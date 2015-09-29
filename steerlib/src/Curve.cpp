@@ -62,17 +62,24 @@ void Curve::drawCurve(Color curveColor, float curveThickness, int window)
 #endif
 }
 
+bool controlPointsComp(CurvePoint a, CurvePoint b) {
+    return i.time < b.time; 
+}
+
 // Sort controlPoints vector in ascending order: min-first
 void Curve::sortControlPoints()
 {
-	//================DELETE THIS PART AND THEN START CODING===================
-	static bool flag = false;
-	if (!flag)
-	{
-		std::cerr << "ERROR>>>>Member function sortControlPoints is not implemented!" << std::endl;
-		flag = true;
-	}
-	//=========================================================================
+    std::vector<CurvePoint>::iterator it;
+
+    for(it=controlPoints.begin() ; it < controlPoints.end(); it++) {
+        std::cout << *it.time << std::endl;
+    } 
+
+    std::sort(controlPoints.begin(), controlPoints.end(), controlPointsComp);
+
+    for(it=controlPoints.begin() ; it < controlPoints.end(); it++) {
+        std::cout << *it.time << std::endl;
+    } 
 
 	return;
 }
