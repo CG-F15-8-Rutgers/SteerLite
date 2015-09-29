@@ -71,15 +71,23 @@ void Curve::sortControlPoints()
 {
     std::vector<CurvePoint>::iterator it;
 
+    /*
+    // Debug code
+    std::cout << "unsorted" << std::endl;
     for(it=controlPoints.begin() ; it < controlPoints.end(); it++) {
         std::cout << (*it).time << std::endl;
-    } 
+    }
+    */
 
     std::sort(controlPoints.begin(), controlPoints.end(), controlPointsComp);
 
+    /*
+    // Debug code
+    std::cout << "sorted" << std::endl;
     for(it=controlPoints.begin() ; it < controlPoints.end(); it++) {
         std::cout << (*it).time << std::endl;
-    } 
+    }
+    */
 
 	return;
 }
@@ -132,17 +140,18 @@ bool Curve::checkRobust()
 // Find the current time interval (i.e. index of the next control point to follow according to current time)
 bool Curve::findTimeInterval(unsigned int& nextPoint, float time)
 {
-	//================DELETE THIS PART AND THEN START CODING===================
-	static bool flag = false;
-	if (!flag)
-	{
-		std::cerr << "ERROR>>>>Member function findTimeInterval is not implemented!" << std::endl;
-		flag = true;
-	}
-	//=========================================================================
+    std::vector<CurvePoint>::iterator it;
 
+    std::cout << "time interval for " << std::endl;
+    std::cout << time << std::endl;
+    for(it=controlPoints.begin() ; it < controlPoints.end(); it++) {
+        if(time < (*it).time) {
+            nextPoint = std::distance(controlPoints.begin(), it);
+            return true;
+        }
+    }
 
-	return true;
+	return false;
 }
 
 // Implement Hermite curve
