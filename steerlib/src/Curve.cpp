@@ -124,17 +124,11 @@ bool Curve::calculatePoint(Point& outputPoint, float time)
 // Check Roboustness
 bool Curve::checkRobust()
 {
-	//================DELETE THIS PART AND THEN START CODING===================
-	static bool flag = false;
-	if (!flag)
-	{
-		std::cerr << "ERROR>>>>Member function checkRobust is not implemented!" << std::endl;
-		flag = true;
-	}
-	//=========================================================================
-
-
-	return true;
+    if(controlPoints.size() >= 2) {
+        return true;
+    } else {
+        return false;
+    }
 }
 
 // Find the current time interval (i.e. index of the next control point to follow according to current time)
@@ -142,8 +136,6 @@ bool Curve::findTimeInterval(unsigned int& nextPoint, float time)
 {
     std::vector<CurvePoint>::iterator it;
 
-    std::cout << "time interval for " << std::endl;
-    std::cout << time << std::endl;
     for(it=controlPoints.begin() ; it < controlPoints.end(); it++) {
         if(time < (*it).time) {
             nextPoint = std::distance(controlPoints.begin(), it);
