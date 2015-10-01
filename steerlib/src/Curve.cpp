@@ -53,14 +53,14 @@ void Curve::drawCurve(Color curveColor, float curveThickness, int window)
 		flag = true;
 	}
 	//=========================================================================
-
+/*
 	// Robustness: make sure there is at least two control point: start and end points
 	checkRobust();
 	// Move on the curve from t=0 to t=finalPoint, using window as step size, and linearly interpolate the curve points
 	CurvePoint curp = controlPoints[0];
 	for(float t=0; t=controlPoints[(controlPoints.size() - 1)].time; t += window){
 		calculatePoint(curp.position, t);
-	}
+	}*/
 	return;
 #endif
 }
@@ -154,12 +154,14 @@ Point Curve::useHermiteCurve(const unsigned int nextPoint, const float time)
 {
 	Point newPosition;
 	float normalTime, intervalTime;
+
 	CurvePoint currentPoint = controlPoints[nextPoint - 1];
 	CurvePoint nextPt = controlPoints[nextPoint];
-//hi
+	
 	// Calculate time interval, and normal time required for later curve calculations
-	intervalTime = controlPoints[nextPoint].time - currentPoint.time;
-	normalTime = (currentPoint.time - time)/intervalTime;
+	intervalTime = nextPt.time - currentPoint.time;
+	normalTime = (time - currentPoint.time)/intervalTime;
+
 	// Calculate position at t = time on Hermite curve
 	newPosition = (2*normalTime*normalTime*normalTime - 3*normalTime*normalTime + 1)*
 		currentPoint.position + (normalTime*normalTime*normalTime - 2*normalTime*normalTime + normalTime)*
@@ -174,25 +176,26 @@ Point Curve::useCatmullCurve(const unsigned int nextPoint, const float time)
 {
 	Point newPosition;
 	float normalTime, intervalTime;
-	CurvePoint currentPoint = controlPoints[nextPoint - 1];
-	//CurvePoint nextPt = controlPoints[nextPoint];
 
 	//================DELETE THIS PART AND THEN START CODING===================
 	static bool flag = false;
 	if (!flag)
 	{
-		std::cerr << "ERROR>>>>Member function useCatmullCurve is not implemented!" << std::endl;
+		std::cerr << "ERROR>>>>Member function CatmullCurve is not implemented!" << std::endl;
 		flag = true;
 	}
 	//=========================================================================
 
+	CurvePoint currentPoint = controlPoints[nextPoint - 1];
+	CurvePoint nextPt = controlPoints[nextPoint];
+	CurvePoint lastPt = controlPoints[nextPoint - 2];
 
 	// Calculate time interval, and normal time required for later curve calculations
-	intervalTime = controlPoints[nextPoint].time - currentPoint.time;
+	intervalTime = nextPt.time - lastPt.time;
 	normalTime = (currentPoint.time - time)/intervalTime;
+
 	// Calculate position at t = time on Catmull-Rom curve
-	//currentTangent = 
-	//nextTangent = 
+
 	
 	// Return result
 	return newPosition;
