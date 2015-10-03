@@ -17,6 +17,7 @@ using namespace Util;
 Curve::Curve(const CurvePoint& startPoint, int curveType) : type(curveType)
 {
 	controlPoints.push_back(startPoint);
+	
 }
 
 Curve::Curve(const std::vector<CurvePoint>& inputPoints, int curveType) : type(curveType)
@@ -52,11 +53,12 @@ void Curve::drawCurve(Color curveColor, float curveThickness, int window)
     Point p0, p1;
 
     calculatePoint(p0, 0);
-    p0.y = p0.y + .1;
+    p0.y = p0.y + 0.10;
+	//std::cout<<window<<","<<controlPoints[(controlPoints.size()-1)].time<<'\n';
 
-	for(float t=window; t < controlPoints[(controlPoints.size() - 1)].time; t += window){
+	for(float t= (float)(window); t <= controlPoints[(controlPoints.size() - 1)].time; t += (float)(window)){
         calculatePoint(p1, t);
-        p1.y = p1.y + .1;
+        p1.y = p1.y + 0.10;
 
         //draw
         DrawLib::glColor(curveColor);
@@ -78,23 +80,23 @@ void Curve::sortControlPoints()
 {
     std::vector<CurvePoint>::iterator it;
 
-    /*
-    // Debug code
+    
+    /* // Debug code
     std::cout << "unsorted" << std::endl;
     for(it=controlPoints.begin() ; it < controlPoints.end(); it++) {
         std::cout << (*it).time << std::endl;
-    }
-    */
+    } */
+   
 
     std::sort(controlPoints.begin(), controlPoints.end(), controlPointsComp);
 
-    /*
-    // Debug code
+    
+    /* // Debug code
     std::cout << "sorted" << std::endl;
     for(it=controlPoints.begin() ; it < controlPoints.end(); it++) {
         std::cout << (*it).time << std::endl;
-    }
-    */
+    } */
+   
 
 	return;
 }
@@ -141,14 +143,14 @@ bool Curve::checkRobust()
 // Find the current time interval (i.e. index of the next control point to follow according to current time)
 bool Curve::findTimeInterval(unsigned int& nextPoint, float time)
 {
-    std::vector<CurvePoint>::iterator it;
+	std::vector<CurvePoint>::iterator it;
 
-    for(it=controlPoints.begin() ; it < controlPoints.end(); it++) {
-        if(time < (*it).time) {
-            nextPoint = std::distance(controlPoints.begin(), it);
-            return true;
-        }
-    }
+	for (it = controlPoints.begin(); it < controlPoints.end(); it++) {
+		if (time < (*it).time) {
+			nextPoint = std::distance(controlPoints.begin(), it);
+			return true;
+		}
+	}
 
 	return false;
 }
@@ -158,21 +160,21 @@ Point Curve::useHermiteCurve(const unsigned int nextPoint, const float time)
 {
 	Point newPosition;
 	float normalTime, intervalTime;
-
-	CurvePoint currentPoint = controlPoints[nextPoint - 1];
+	
+	CurvePoint currentPoint = controlPoints[nextPoint-1];
 	CurvePoint nextPt = controlPoints[nextPoint];
 	
 	// Calculate time interval, and normal time required for later curve calculations
 	intervalTime = nextPt.time - currentPoint.time;
 	normalTime = (time - currentPoint.time)/intervalTime;
-
+	
 	// Calculate position at t = time on Hermite curve
-	newPosition = (2*normalTime*normalTime*normalTime - 3*normalTime*normalTime + 1)*
-		currentPoint.position + (normalTime*normalTime*normalTime - 2*normalTime*normalTime + normalTime)*
-		currentPoint.tangent +(-2*normalTime*normalTime*normalTime +3*normalTime*normalTime)*nextPt.position +
-		(normalTime*normalTime*normalTime - normalTime*normalTime)*nextPt.tangent;
+	newPosition = (2.0*normalTime*normalTime*normalTime - 3.0*normalTime*normalTime + 1.0)*currentPoint.position
+		+ (normalTime*normalTime*normalTime - 2.0*normalTime*normalTime + normalTime)*currentPoint.tangent*intervalTime
+		+ (-2.0*normalTime*normalTime*normalTime + 3.0*normalTime*normalTime)*nextPt.position
+		+ (normalTime*normalTime*normalTime - normalTime*normalTime)*nextPt.tangent*intervalTime;
+	
 	// Return result
-    //std::cout << newPosition.x << "," << newPosition.y << "," << newPosition.z << std::endl;
 	return newPosition;
 }
 
