@@ -183,25 +183,43 @@ Point Curve::useCatmullCurve(const unsigned int nextPoint, const float time)
 {
 	Point newPosition;
 	float normalTime, intervalTime;
-
-	//================DELETE THIS PART AND THEN START CODING===================
-	static bool flag = false;
-	if (!flag)
-	{
-		std::cerr << "ERROR>>>>Member function CatmullCurve is not implemented!" << std::endl;
-		flag = true;
-	}
-	//=========================================================================
-
-	CurvePoint currentPoint = controlPoints[nextPoint - 1];
+	Util::Vector s0, s1;
+	CurvePoint currentPt = controlPoints[nextPoint - 1];
 	CurvePoint nextPt = controlPoints[nextPoint];
-	CurvePoint lastPt = controlPoints[nextPoint - 2];
 
 	// Calculate time interval, and normal time required for later curve calculations
-	intervalTime = nextPt.time - lastPt.time;
-	normalTime = (currentPoint.time - time)/intervalTime;
+	intervalTime = nextPt.time - currentPt.time;
+	normalTime = (time - currentPt.time)/intervalTime;
 
 	// Calculate position at t = time on Catmull-Rom curve
+	if (nextPoint == 1) {
+		//calculate s0 with special case
+		CurvePoint otherPt = controlPoints[nextPoint + 1];
+		s0 = (otherPt.time - currentPt.time)/(otherPt.time - nextPt.time)*(nextPt.position - currentPt.position)/(nextPt.time-currentPt.time) -
+				(nextPt.time - currentPt.time)/(otherPt.time - nextPt.time)*(otherPt.position - currentPt.position)/(otherPt.time - currentPt.time);
+	}
+	else {
+		//calculate as normal
+		CurvePoint otherPt = controlPoints[nextPoint - 2];
+		s0 = (currentPt.time - otherPt.time)/(nextPt.time - otherPt.time)*(nextPt.position - currentPt.position)/(nextPt.time - currentPt.time) +
+				(nextPt.time - currentPt.time)/(nextPt.time - otherPt.time)*(currentPt.position - otherPt.position)/(currentPt.time - otherPt.time);
+	}
+	if (nextPoint == (controlPoints.size() - 1)) {
+		//calculate s1 with special case
+		CurvePoint otherPt = controlPoints[nextPoint - 2];
+		s1 = (nextPt.time - otherPt.time)/(currentPt.time-otherPt.time)*(nextPt.position - currentPt.position)/(nextPt.time - currentPt.time) -
+				(nextPt.time - currentPt.time)/(currentPt.time - otherPt.time)*(nextPt.position - otherPt.position)/(nextPt.time - otherPt.time);
+	}
+	else {
+		//calculate as normal
+		CurvePoint otherPt = controlPoints[nextPoint + 1];
+		s1 = (nextPt.time - currentPt.time)/(otherPt.time - currentPt.time)*(otherPt.position - nextPt.position)/(otherPt.time - nextPt.time) +
+				(otherPt.time - nextPt.time)/(otherPt.time - currentPt.time)*(nextPt.position - currentPt.position)/(nextPt.time - currentPt.time);
+	}
+	newPosition = (2.0*normalTime*normalTime*normalTime - 3.0*normalTime*normalTime + 1.0)*currentPt.position
+		+ (normalTime*normalTime*normalTime - 2.0*normalTime*normalTime + normalTime)*s0*intervalTime
+		+ (-2.0*normalTime*normalTime*normalTime + 3.0*normalTime*normalTime)*nextPt.position
+		+ (normalTime*normalTime*normalTime - normalTime*normalTime)*s1*intervalTime;
 
 	
 	// Return result
