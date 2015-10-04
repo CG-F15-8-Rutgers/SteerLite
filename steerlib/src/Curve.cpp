@@ -56,7 +56,7 @@ void Curve::drawCurve(Color curveColor, float curveThickness, int window)
     p0.y = p0.y + 0.10;
 	//std::cout<<window<<","<<controlPoints[(controlPoints.size()-1)].time<<'\n';
 
-	for(float t= (float)(window); t <= controlPoints[(controlPoints.size() - 1)].time+5; t += (float)(window)){
+	for(float t = (float)(window); t <= controlPoints[(controlPoints.size() - 1)].time; t += (float)(window)){
         calculatePoint(p1, t);
         p1.y = p1.y + 0.10;
 
@@ -167,10 +167,14 @@ bool Curve::checkRobust()
 // Find the current time interval (i.e. index of the next control point to follow according to current time)
 bool Curve::findTimeInterval(unsigned int& nextPoint, float time)
 {
+    if(time == 0) {
+        time = time + 0.001;
+    }
+
 	std::vector<CurvePoint>::iterator it;
 
 	for (it = controlPoints.begin(); it < controlPoints.end(); it++) {
-		if (time < (*it).time) {
+		if (time <= (*it).time) {
 			nextPoint = std::distance(controlPoints.begin(), it);
 			return true;
 		}
