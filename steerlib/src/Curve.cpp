@@ -56,7 +56,7 @@ void Curve::drawCurve(Color curveColor, float curveThickness, int window)
     p0.y = p0.y + 0.10;
 	//std::cout<<window<<","<<controlPoints[(controlPoints.size()-1)].time<<'\n';
 
-	for(float t= (float)(window); t <= controlPoints[(controlPoints.size() - 1)].time; t += (float)(window)){
+	for(float t= (float)(window); t <= controlPoints[(controlPoints.size() - 1)].time+5; t += (float)(window)){
         calculatePoint(p1, t);
         p1.y = p1.y + 0.10;
 
@@ -78,8 +78,9 @@ bool controlPointsComp(CurvePoint a, CurvePoint b) {
 // Sort controlPoints vector in ascending order: min-first
 void Curve::sortControlPoints()
 {
-    std::vector<CurvePoint>::iterator it;
-
+    std::vector<CurvePoint>::iterator it = controlPoints.begin();
+	++it;
+	std::vector<CurvePoint>::iterator it2 = controlPoints.begin();
     
     /* // Debug code
     std::cout << "unsorted" << std::endl;
@@ -89,13 +90,36 @@ void Curve::sortControlPoints()
    
 
     std::sort(controlPoints.begin(), controlPoints.end(), controlPointsComp);
+	//Eliminate control points with identical times until only one remains
+	for (it; it < controlPoints.end(); ++it) {
+		if ((*it).time == (*it2).time) {
+			for (std::vector<CurvePoint>::iterator temp = it; temp < controlPoints.end(); ++temp) {
+				if ((*temp).time > (*it).time) {
+					Vector dist1 = (*temp).position - (*it2).position;
+					Vector dist2 = (*temp).position - (*it).position;
+					float mag1 = dist1.x*dist1.x + dist1.y*dist1.y + dist1.z*dist1.z;
+					float mag2 = dist2.x*dist2.x + dist2.y*dist2.y + dist2.z*dist2.z;
+					if (mag1 > mag2) {
+						//delete temp1 = it2
+						controlPoints.erase(it2);
+					}
+					else {
+						controlPoints.erase(it);
+						it=it2;
+					}
+					break;
+				}
+			}
+		}
+		it2 = it;
+	}
 
     
-    /* // Debug code
+    // Debug code
     std::cout << "sorted" << std::endl;
     for(it=controlPoints.begin() ; it < controlPoints.end(); it++) {
         std::cout << (*it).time << std::endl;
-    } */
+    }
    
 
 	return;
