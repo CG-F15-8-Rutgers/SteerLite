@@ -41,7 +41,7 @@ void Curve::addControlPoints(const std::vector<CurvePoint>& inputPoints)
 	sortControlPoints();
 }
 
-// Draw the curve shape on screen, usign window as step size (bigger window: less accurate shape)
+// Draw the curve shape on screen, using window as step size (bigger window: less accurate shape)
 void Curve::drawCurve(Color curveColor, float curveThickness, int window)
 {
 #ifdef ENABLE_GUI
@@ -115,12 +115,12 @@ void Curve::sortControlPoints()
 	}
 
     
-    // Debug code
+    /*  // Debug code
     std::cout << "sorted" << std::endl;
     for(it=controlPoints.begin() ; it < controlPoints.end(); it++) {
         std::cout << (*it).time << std::endl;
     }
-   
+    */
 
 	return;
 }
@@ -154,7 +154,7 @@ bool Curve::calculatePoint(Point& outputPoint, float time)
 	return true;
 }
 
-// Check Roboustness
+// Check Robustness
 bool Curve::checkRobust()
 {
     if(controlPoints.size() >= 2) {

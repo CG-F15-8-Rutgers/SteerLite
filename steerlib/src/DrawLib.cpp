@@ -246,6 +246,7 @@ void DrawLib::drawAgentDisc(const Point & pos, const Vector & dir, float radius,
 	glPopMatrix();
 }
 
+
 //
 // drawAgentDisc() - use only after the agent display lists are built.
 //
@@ -619,9 +620,20 @@ void DrawLib::drawCube()
 	_drawDisplayList(_cubeDisplayList);
 }
 
-void DrawLib::drawSphere()
+void DrawLib::drawSphere(const Point & pos, const Vector & dir, float radius, const Color& color)
 {
-	_drawDisplayList(_sphereDisplayList);
+		glPushMatrix();
+	{
+		float rad = atan2(dir.z, dir.x)*(-M_180_OVER_PI);
+		glColor(color);
+		glTranslate(pos);
+		glTranslatef(0.0f,0.5f,0.0f);
+		glRotatef(rad,0.0f,1.0f,0.0f);
+		glScalef(radius, radius, radius);
+
+		_drawDisplayList(_sphereDisplayList);
+	}
+	glPopMatrix();
 }
 
 #endif // ifdef ENABLE_GUI

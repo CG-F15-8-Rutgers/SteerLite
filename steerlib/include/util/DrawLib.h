@@ -110,7 +110,7 @@ namespace Util {
 		// static void drawCylinderWireFrame(const Point & pos, float radius, float ymin, float ymax);
 		// static void drawSphere(const Point & center, float radius);
 		static void drawCube();
-		static void drawSphere();
+		static void drawSphere(const Point & pos, const Vector & dir, float radius, const Color& color);
 		//@}
 
 		/// @name Composite shapes drawing functionality
