@@ -131,11 +131,12 @@ namespace SteerLib
 
             static Util::Vector Support(Util::Vector& direction, const std::vector<Util::Vector>& _shapeA, const std::vector<Util::Vector>& _shapeB);
             static Util::Vector MaxPointAlongDirection(Util::Vector& direction, const std::vector<Util::Vector>& _shape);
+            static bool NearestSimplex(Util::Vector& direction, std::vector<Util::Vector>& simplex);
 
             static bool intersect(float& return_penetration_depth, Util::Vector& return_penetration_vector, const std::vector<Util::Vector>& _shapeA, const std::vector<Util::Vector>& _shapeB);
-			static bool SteerLib::GJK_EPA::GJK(const std::vector<Util::Vector>& _shapeA, const std::vector<Util::Vector>& _shapeB);
-			static bool SteerLib::GJK_EPA::EPA(const std::vector<Util::Vector>& _shapeA, const std::vector<Util::Vector>& _shapeB, const std::vector<Util::Vector>& _simplex);
-			static Util::Point SteerLib::GJK_EPA::support(const std::vector<Util::Vector>& _shapeA, const std::vector<Util::Vector>& _shapeB, const Util::Point _point)
+			static bool GJK(const std::vector<Util::Vector>& _shapeA, const std::vector<Util::Vector>& _shapeB);
+			static bool EPA(const std::vector<Util::Vector>& _shapeA, const std::vector<Util::Vector>& _shapeB, const std::vector<Util::Vector>& _simplex);
+			static Util::Vector support(const std::vector<Util::Vector>& _shapeA, const std::vector<Util::Vector>& _shapeB, const Util::Vector _direction);
 
         private:
 
