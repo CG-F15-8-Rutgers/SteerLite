@@ -138,6 +138,7 @@ namespace SteerLib
 			static bool EPA(const std::vector<Util::Vector>& _shapeA, const std::vector<Util::Vector>& _shapeB, const std::vector<Util::Vector>& _simplex);
 			static Util::Vector support(const std::vector<Util::Vector>& _shapeA, const std::vector<Util::Vector>& _shapeB, const Util::Vector _direction);
 
+
         private:
 
     }; // class GJK_EPA

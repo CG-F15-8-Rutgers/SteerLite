@@ -152,9 +152,8 @@ bool SteerLib::GJK_EPA::GJK(const std::vector<Util::Vector>& _shapeA, const std:
     }
 }
 
-bool SteerLib::GJK_EPA::EPA(const std::vector<Util::Vector>& _shapeA, const std::vector<Util::Vector>& _shapeB, const std::vector<Util::Vector>& _simplex)
+bool SteerLib::GJK_EPA::EPA(const std::vector<Util::Vector>& _shapeA, const std::vector<Util::Vector>& _shapeB, const std::vector<Util::Vector>& _simplex, float& penetration_depth, Util::Vector& penetration_vector)
 {
-  /*
 	std::vector<Util::Vector> S = _simplex;
 	Util::Point origin (0,0,0);
 	const float TOLERANCE = 0.000001;
@@ -178,7 +177,7 @@ bool SteerLib::GJK_EPA::EPA(const std::vector<Util::Vector>& _shapeA, const std:
 		}
 		float k = (dot(origin,S.at(temp_j)))/(dot(S.at(temp_j),S.at(temp_j)));
 		Util::Vector edgepoint = k * S.at(temp_j);
-		Util::Vector simplexpoint = support(_shapeA, _shapeB, edgepoint);
+		Util::Vector simplexpoint = Support(edgepoint, _shapeA, _shapeB);
 		
 		std::vector<Util::Vector>::iterator it = S.begin();
 		for (int temp = 0; temp < temp_i-1; temp++) {
@@ -191,7 +190,10 @@ bool SteerLib::GJK_EPA::EPA(const std::vector<Util::Vector>& _shapeA, const std:
 			done = true;
 		}
 	}
-*/	
+	
+	penetration_depth = MTV.length();
+	penetration_vector = MTV;
+	return true;
 }
 
 
@@ -204,16 +206,16 @@ Util::Vector SteerLib::GJK_EPA::support(const std::vector<Util::Vector>& _shapeA
 	Util::Point supportA;
 	Util::Point supportB;
 	Util::Point support;
-	float distA = std::numeric_limits<float>::max();
-	float distB = std::numeric_limits<float>::max();
+	float distA = -1 * std::numeric_limits<float>::max();
+	float distB = -1 * std::numeric_limits<float>::max();
 	for (i = 0; i < _shapeA.size();++i){
-		if((_shapeA.at(i)-d).lengthSquared() < distA){
+		if((_shapeA.at(i)-d).lengthSquared() > distA){
 			distA = (_shapeA.at(i) - d).lengthSquared();
 			supportA = _shapeA.at(i);
 		}
 	}
 	for (i = 0; i < _shapeB.size();++i){
-		if((_shapeB.at(i)-d).lengthSquared() < distB){
+		if((_shapeB.at(i)-d).lengthSquared() > distB){
 			distB = (d - _shapeB.at(i)).lengthSquared();
 			supportB = _shapeB.at(i);
 		}
