@@ -13,6 +13,8 @@
 
 
 #include <vector>
+#include <limits>
+#include <cmath>
 
 
 namespace SteerLib

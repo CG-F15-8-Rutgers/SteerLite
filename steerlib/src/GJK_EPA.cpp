@@ -28,16 +28,17 @@ bool SteerLib::GJK_EPA::EPA(const std::vector<Util::Vector>& _shapeA, const std:
 	std::vector<Util::Vector> S = _simplex;
 	Util::Point origin (0,0,0);
 	const float TOLERANCE = 0.000001;
-	float distance = 1.0;
+	bool done = false;
 	
-	while(distance > TOLERANCE)
+	while(!done)
 	{
-		float simplex_Distance = Float.MAX_VALUE;
+		float simplex_Distance = std::numeric_limits<float>::max();
 		float temp;
-		int temp_i = 0;
-		int temp_j = 0;
-		for (int i = 0; i < S.getSize(); ++i) {
-			int j = (i+1)%S.getSize();
+		int temp_i;
+		int temp_j;
+		
+		for (int i = 0; i < S.size(); ++i) {
+			int j = (i+1)%S.size();
 			temp = distSqPointLineSegment(S.at(i),S.at(j),origin);
 			if(temp < simplex_Distance){
 				simplex_Distance = temp;
@@ -46,9 +47,19 @@ bool SteerLib::GJK_EPA::EPA(const std::vector<Util::Vector>& _shapeA, const std:
 			}
 		}
 		float k = (dot(origin,S.at(temp_j)))/(dot(S.at(temp_j),S.at(temp_j)));
-		Util::Point edgepoint = k * S.at(temp_j);
-		Util::Point simplexpoint = support(_shapeA, _shapeB, edgepoint);
-		S.insert(simplexpoint);
+		Util::Vector edgepoint = k * S.at(temp_j);
+		Util::Vector simplexpoint = support(_shapeA, _shapeB, edgepoint);
+		
+		std::vector<Util::Vector>::iterator it = S.begin();
+		for (int temp = 0; temp < temp_i-1; temp++) {
+			++it;
+		}
+		S.insert(it, simplexpoint);
+		
+		Util::Vector Diff = edgepoint - simplexpoint;
+		if ((std::abs(Diff.x) < TOLERANCE) && (std::abs(Diff.y) < TOLERANCE) && (std::abs(Diff.z) < TOLERANCE) && (Diff.length() < TOLERANCE)) {
+			done = true;
+		}
 	}
 	
 }
@@ -56,25 +67,23 @@ bool SteerLib::GJK_EPA::EPA(const std::vector<Util::Vector>& _shapeA, const std:
 
 
 
-Util::Point SteerLib::GJK_EPA::support(const std::vector<Util::Vector>& _shapeA, const std::vector<Util::Vector>& _shapeB, const Util::Point _point)
+Util::Vector SteerLib::GJK_EPA::support(const std::vector<Util::Vector>& _shapeA, const std::vector<Util::Vector>& _shapeB, const Util::Vector _direction)
 {
-	std::vector<Util::Vector> A = _shapeA;
-	std::vector<Util::Vector> B = _shapeB;
-	Util::Point P = _point;
+	Util::Vector d = _direction;
 	Util::Point supportA;
 	Util::Point supportB;
 	Util::Point support;
-	float distA = Float.MAX_VALUE;
-	float distB = Float.MAX_VALUE;
-	for (i = 0; i < _shapeA.getSize();++i){
-		if(_shapeA.at(i)-P < distA){
-			distA = _shapeA.at(i) - P;
+	float distA = std::numeric_limits<float>::max();
+	float distB = std::numeric_limits<float>::max();
+	for (i = 0; i < _shapeA.size();++i){
+		if((_shapeA.at(i)-d).lengthSquared() < distA){
+			distA = (_shapeA.at(i) - d).lengthSquared();
 			supportA = _shapeA.at(i);
 		}
 	}
-	for (i = 0; i < _shapeB.getSize();++i){
-		if(_shapeB.at(i)-P < distB){
-			distB = P - _shapeB.at(i);
+	for (i = 0; i < _shapeB.size();++i){
+		if((_shapeB.at(i)-d).lengthSquared() < distB){
+			distB = (d - _shapeB.at(i)).lengthSquared();
 			supportB = _shapeB.at(i);
 		}
 	}
