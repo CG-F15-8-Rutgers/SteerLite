@@ -126,6 +126,10 @@ namespace SteerLib
              *  original version of polygon1
              *  DO NOT MODIFY polygon1.xml
              */
+
+            static Util::Vector Support(Util::Vector& direction, const std::vector<Util::Vector>& _shapeA, const std::vector<Util::Vector>& _shapeB);
+            static Util::Vector MaxPointAlongDirection(Util::Vector& direction, const std::vector<Util::Vector>& _shape);
+
             static bool intersect(float& return_penetration_depth, Util::Vector& return_penetration_vector, const std::vector<Util::Vector>& _shapeA, const std::vector<Util::Vector>& _shapeB);
 
         private:
