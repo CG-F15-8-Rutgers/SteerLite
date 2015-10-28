@@ -12,14 +12,6 @@ SteerLib::GJK_EPA::GJK_EPA()
 {
 }
 
-/*
- * Returns True if shapeA and shapeB intersect, False if not.
- * Also sets a value to simplex if shapeA and shapeB intersect
-bool SteerLib::GJK_EPA::GJK(std::vector<Util::Vector>& simplex, const std::vector<Util::Vector>& _shapeA, const std::vector<Util::Vector>& _shapeB) {
-    
-}
- */
-
 Util::Vector SteerLib::GJK_EPA::Support(Util::Vector& direction, const std::vector<Util::Vector>& _shapeA, const std::vector<Util::Vector>& _shapeB) {
     Util::Vector negD = direction * -1;
     Util::Vector maxA = MaxPointAlongDirection(direction, _shapeA);
@@ -224,7 +216,7 @@ bool SteerLib::GJK_EPA::EPA(const std::vector<Util::Vector>& _shapeA, const std:
 		//std::cout<<S.at(temp_j).x<<S.at(temp_j).y<<S.at(temp_j).z<<" equals ";
 		//std::cout<<edgepoint.x<<edgepoint.y<<edgepoint.z<<'\n';
 		Util::Vector simplexpoint = Support(edgepoint, _shapeA, _shapeB);
-		std::cout<<simplexpoint.x<<simplexpoint.y<<simplexpoint.z<<'\n';
+		//std::cout<<simplexpoint.x<<simplexpoint.y<<simplexpoint.z<<'\n';
 		
 		if (temp_i == S.size()-1)
 			S.push_back(simplexpoint);
