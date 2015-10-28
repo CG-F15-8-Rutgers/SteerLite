@@ -49,9 +49,10 @@ bool SteerLib::GJK_EPA::NearestSimplex(Util::Vector& direction, std::vector<Util
 
     if(size == 1) {
         // Should never happen but just return the point in case
-        std::cout << "something fucked up. size 1" << std::endl;
+        //std::cout << "something fucked up. size 1" << std::endl;
         direction = direction * -1;
-    } else if(size == 2) {
+    }
+	else if(size == 2) {
         Util::Vector A = simplex[1];
         Util::Vector B = simplex[0];
 
@@ -61,18 +62,19 @@ bool SteerLib::GJK_EPA::NearestSimplex(Util::Vector& direction, std::vector<Util
         if(AB*A0 > 0) {
             //s = [A, B], d = AB*A0*AB
             direction = cross(cross(AB, A0), AB);
-
-            if(direction.x == 0 && direction.y == 0 && direction.z == 0) {
-                // std::cout << "zero dir found" << std::endl;
-            }
-        } else {
+			if((direction.x == 0) && (direction.y == 0) && (direction.z == 0)){
+				//std::cout<<"zero dir found"<<std::endl;
+			}
+		}
+        else {
             //s = [A], d = A0
             simplex.erase(simplex.begin());
             direction = A0;
         }
 
         return false;
-    } else if(size == 3) {
+    }
+	else if(size == 3) {
         Util::Vector A = simplex[2];
         Util::Vector B = simplex[1];
         Util::Vector C = simplex[0];
@@ -119,9 +121,10 @@ bool SteerLib::GJK_EPA::NearestSimplex(Util::Vector& direction, std::vector<Util
                 return true;
             }
         }
-    } else {
+    }
+	else {
         //should never happen
-        std::cout << "something fucked up. size > 3" << std::endl;
+        //std::cout << "something fucked up. size > 3" << std::endl;
     }
 }
 
@@ -144,14 +147,19 @@ bool SteerLib::GJK_EPA::intersect(float& return_penetration_depth, Util::Vector&
 
 bool SteerLib::GJK_EPA::GJK(const std::vector<Util::Vector>& _shapeA, const std::vector<Util::Vector>& _shapeB, std::vector<Util::Vector>& _simplex)
 {
-    Util::Vector firstSimplex = _shapeA[0] - _shapeB[0];
+    /* Util::Vector firstSimplex = _shapeA[0] - _shapeB[0];
     std::vector<Util::Vector> simplex = std::vector<Util::Vector>();
     simplex.push_back(firstSimplex);
     
-    Util::Vector direction = firstSimplex * -1;
+    Util::Vector direction = firstSimplex * -1; */
+	
+	Util::Vector direction (0.0f, 0.0f, 1.0f);
+	std::vector<Util::Vector> simplex;
+	simplex.push_back(Support(direction, _shapeA, _shapeB));
+	direction = -1 * direction;
 
-    while(1) {
-        Util::Vector nextPoint = Support(direction, _shapeA, _shapeB);
+    while(true) {
+        /* Util::Vector nextPoint = Support(direction, _shapeA, _shapeB);
         if(nextPoint * direction < 0) {
             return false; 
         }
@@ -161,6 +169,20 @@ bool SteerLib::GJK_EPA::GJK(const std::vector<Util::Vector>& _shapeA, const std:
 			_simplex = simplex;
             return true;
         }
+		direction = simplex.back()*-1; */
+		
+		simplex.push_back(Support(direction, _shapeA, _shapeB));
+		if (simplex.back() * direction < 0) {
+			return false;
+		}
+		// If the point added did not pass the origin, the origin is not contained
+		bool done = NearestSimplex(direction, simplex);
+		if (done) {
+			_simplex = simplex;
+			return true;
+		}
+		
+		
     }
 }
 
@@ -173,11 +195,11 @@ bool SteerLib::GJK_EPA::EPA(const std::vector<Util::Vector>& _shapeA, const std:
 	Util::Vector Current;
 	int count = 0;
 	
-	for (int i = 0; i < S.size(); ++i) {
+	/* for (int i = 0; i < S.size(); ++i) {
 		std::cout<<S.at(i).x<<','<<S.at(i).y<<','<<S.at(i).z<<'\n';
-	}
+	} */
 	
-	while(1)
+	while(true)
 	{
 		float simplex_Distance = std::numeric_limits<float>::max();
 		float temp;
@@ -198,10 +220,11 @@ bool SteerLib::GJK_EPA::EPA(const std::vector<Util::Vector>& _shapeA, const std:
 		}
 		float k = (dot((-1*S.at(temp_i)), (S.at(temp_j)-S.at(temp_i))))/(dot((S.at(temp_j)-S.at(temp_i)), (S.at(temp_j)-S.at(temp_i))));
 		Util::Vector edgepoint = k*(S.at(temp_j)-S.at(temp_i)) + S.at(temp_i);
-		std::cout<<S.at(temp_i).x<<S.at(temp_i).y<<S.at(temp_i).z<<" and ";
-		std::cout<<S.at(temp_j).x<<S.at(temp_j).y<<S.at(temp_j).z<<" equals ";
-		std::cout<<edgepoint.x<<edgepoint.y<<edgepoint.z<<'\n';
+		//std::cout<<S.at(temp_i).x<<S.at(temp_i).y<<S.at(temp_i).z<<" and ";
+		//std::cout<<S.at(temp_j).x<<S.at(temp_j).y<<S.at(temp_j).z<<" equals ";
+		//std::cout<<edgepoint.x<<edgepoint.y<<edgepoint.z<<'\n';
 		Util::Vector simplexpoint = Support(edgepoint, _shapeA, _shapeB);
+		std::cout<<simplexpoint.x<<simplexpoint.y<<simplexpoint.z<<'\n';
 		
 		if (temp_i == S.size()-1)
 			S.push_back(simplexpoint);
@@ -221,7 +244,7 @@ bool SteerLib::GJK_EPA::EPA(const std::vector<Util::Vector>& _shapeA, const std:
 		++count;
 		if (count >= 2) {
 			Util::Vector Diff = Current - Last;
-			if ((std::abs(Diff.x) < TOLERANCE) && (std::abs(Diff.y) <= TOLERANCE) && (std::abs(Diff.z) <= TOLERANCE) &&  (Diff.length() <= TOLERANCE)) {
+			if ((std::abs(Diff.x) <= TOLERANCE) && (std::abs(Diff.y) <= TOLERANCE) && (std::abs(Diff.z) <= TOLERANCE) &&  (Diff.length() <= TOLERANCE)) {
 				penetration_depth = Current.length();
 				penetration_vector = Current;
 				return true;
@@ -231,31 +254,3 @@ bool SteerLib::GJK_EPA::EPA(const std::vector<Util::Vector>& _shapeA, const std:
 	
 }
 
-
-
-
-/* Util::Vector SteerLib::GJK_EPA::support(const std::vector<Util::Vector>& _shapeA, const std::vector<Util::Vector>& _shapeB, const Util::Vector _direction)
-{
-  /*
-	Util::Vector d = _direction;
-	Util::Point supportA;
-	Util::Point supportB;
-	Util::Point support;
-	float distA = -1 * std::numeric_limits<float>::max();
-	float distB = -1 * std::numeric_limits<float>::max();
-	for (i = 0; i < _shapeA.size();++i){
-		if((_shapeA.at(i)-d).lengthSquared() > distA){
-			distA = (_shapeA.at(i) - d).lengthSquared();
-			supportA = _shapeA.at(i);
-		}
-	}
-	for (i = 0; i < _shapeB.size();++i){
-		if((_shapeB.at(i)-d).lengthSquared() > distB){
-			distB = (d - _shapeB.at(i)).lengthSquared();
-			supportB = _shapeB.at(i);
-		}
-	}
-	support = supportA - supportB;
-	return support;
-    */
-//} */
