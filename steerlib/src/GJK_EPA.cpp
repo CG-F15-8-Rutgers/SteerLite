@@ -128,10 +128,21 @@ bool SteerLib::GJK_EPA::NearestSimplex(Util::Vector& direction, std::vector<Util
 //Look at the GJK_EPA.h header file for documentation and instructions
 bool SteerLib::GJK_EPA::intersect(float& return_penetration_depth, Util::Vector& return_penetration_vector, const std::vector<Util::Vector>& _shapeA, const std::vector<Util::Vector>& _shapeB)
 {
-    return GJK(_shapeA, _shapeB); // There is no collision
+	std::vector<Util::Vector> S;
+	bool collision = GJK(_shapeA, _shapeB, S);
+	if (collision) {
+		EPA(_shapeA, _shapeB, S, return_penetration_depth, return_penetration_vector);
+		return collision;
+	}
+	else {
+		return_penetration_depth = 0;
+		return_penetration_vector.zero();
+		return collision;
+	}
+    
 }
 
-bool SteerLib::GJK_EPA::GJK(const std::vector<Util::Vector>& _shapeA, const std::vector<Util::Vector>& _shapeB)
+bool SteerLib::GJK_EPA::GJK(const std::vector<Util::Vector>& _shapeA, const std::vector<Util::Vector>& _shapeB, std::vector<Util::Vector>& _simplex)
 {
     Util::Vector firstSimplex = _shapeA[0] - _shapeB[0];
     std::vector<Util::Vector> simplex = std::vector<Util::Vector>();
@@ -147,6 +158,7 @@ bool SteerLib::GJK_EPA::GJK(const std::vector<Util::Vector>& _shapeA, const std:
 
         simplex.push_back(nextPoint);
         if(NearestSimplex(direction, simplex)) {
+			_simplex = simplex;
             return true;
         }
     }
@@ -157,49 +169,72 @@ bool SteerLib::GJK_EPA::EPA(const std::vector<Util::Vector>& _shapeA, const std:
 	std::vector<Util::Vector> S = _simplex;
 	Util::Point origin (0,0,0);
 	const float TOLERANCE = 0.000001;
-	bool done = false;
+	Util::Vector Last;
+	Util::Vector Current;
+	int count = 0;
 	
-	while(!done)
+	for (int i = 0; i < S.size(); ++i) {
+		std::cout<<S.at(i).x<<','<<S.at(i).y<<','<<S.at(i).z<<'\n';
+	}
+	
+	while(1)
 	{
 		float simplex_Distance = std::numeric_limits<float>::max();
 		float temp;
 		int temp_i;
 		int temp_j;
+		Last = Current;
 		
 		for (int i = 0; i < S.size(); ++i) {
 			int j = (i+1)%S.size();
-			temp = distSqPointLineSegment(S.at(i),S.at(j),origin);
+			Util::Point tempA (S.at(i).x, S.at(i).y, S.at(i).z);
+			Util::Point tempB (S.at(j).x, S.at(j).y, S.at(j).z);
+			temp = distSqPointLineSegment(tempA, tempB, origin);
 			if(temp < simplex_Distance){
 				simplex_Distance = temp;
 				temp_i = i;
 				temp_j = j;
 			}
 		}
-		float k = (dot(origin,S.at(temp_j)))/(dot(S.at(temp_j),S.at(temp_j)));
-		Util::Vector edgepoint = k * S.at(temp_j);
+		float k = (dot((-1*S.at(temp_i)), (S.at(temp_j)-S.at(temp_i))))/(dot((S.at(temp_j)-S.at(temp_i)), (S.at(temp_j)-S.at(temp_i))));
+		Util::Vector edgepoint = k*(S.at(temp_j)-S.at(temp_i)) + S.at(temp_i);
+		std::cout<<S.at(temp_i).x<<S.at(temp_i).y<<S.at(temp_i).z<<" and ";
+		std::cout<<S.at(temp_j).x<<S.at(temp_j).y<<S.at(temp_j).z<<" equals ";
+		std::cout<<edgepoint.x<<edgepoint.y<<edgepoint.z<<'\n';
 		Util::Vector simplexpoint = Support(edgepoint, _shapeA, _shapeB);
 		
-		std::vector<Util::Vector>::iterator it = S.begin();
-		for (int temp = 0; temp < temp_i-1; temp++) {
-			++it;
+		if (temp_i == S.size()-1)
+			S.push_back(simplexpoint);
+		else {
+			std::vector<Util::Vector>::iterator it;
+			for (it = S.begin(); it != S.end(); ++it) {
+				if ((*it) == S.at(temp_j))
+					break;
+			}
+			//std::cout<<S.at(temp_i).x<<S.at(temp_i).y<<S.at(temp_i).z<<'\n';
+			//std::cout<<S.at(temp_j).x<<S.at(temp_j).y<<S.at(temp_j).z<<'\n';
+			S.insert(it, simplexpoint);
+			//std::cout<<S.at(temp_j).x<<S.at(temp_j).y<<S.at(temp_j).z<<'\n';
 		}
-		S.insert(it, simplexpoint);
-		
-		Util::Vector Diff = edgepoint - simplexpoint;
-		if ((std::abs(Diff.x) < TOLERANCE) && (std::abs(Diff.y) < TOLERANCE) && (std::abs(Diff.z) < TOLERANCE) && (Diff.length() < TOLERANCE)) {
-			done = true;
+		Current = simplexpoint;
+		//std::cout<<Current.x<<Current.y<<Current.z<<'\n';
+		++count;
+		if (count >= 2) {
+			Util::Vector Diff = Current - Last;
+			if ((std::abs(Diff.x) < TOLERANCE) && (std::abs(Diff.y) <= TOLERANCE) && (std::abs(Diff.z) <= TOLERANCE) &&  (Diff.length() <= TOLERANCE)) {
+				penetration_depth = Current.length();
+				penetration_vector = Current;
+				return true;
+			}
 		}
 	}
 	
-	penetration_depth = MTV.length();
-	penetration_vector = MTV;
-	return true;
 }
 
 
 
 
-Util::Vector SteerLib::GJK_EPA::support(const std::vector<Util::Vector>& _shapeA, const std::vector<Util::Vector>& _shapeB, const Util::Vector _direction)
+/* Util::Vector SteerLib::GJK_EPA::support(const std::vector<Util::Vector>& _shapeA, const std::vector<Util::Vector>& _shapeB, const Util::Vector _direction)
 {
   /*
 	Util::Vector d = _direction;
@@ -223,4 +258,4 @@ Util::Vector SteerLib::GJK_EPA::support(const std::vector<Util::Vector>& _shapeA
 	support = supportA - supportB;
 	return support;
     */
-}
+//} */
