@@ -313,6 +313,8 @@ Util::Vector SocialForcesAgent::calcProximityForce(float dt)
 
 Vector SocialForcesAgent::calcGoalForce(Vector _goalDirection, float _dt)
 {
+    std:: cout << _goalDirection << std::endl;
+    std:: cout << velocity() << std::endl;
     Vector goalForce = (_goalDirection - velocity()) / _dt;
     return goalForce;
 }
@@ -330,7 +332,38 @@ Util::Vector SocialForcesAgent::calcRepulsionForce(float dt)
 
 Util::Vector SocialForcesAgent::calcAgentRepulsionForce(float dt)
 {
-    std::cerr<<"<<<calcAgentRepulsionForce>>> Please Implement my body\n";
+    Util::Vector agent_repulsion_force = Util::Vector(0,0,0);
+	std::set<SteerLib::SpatialDatabaseItemPtr> _neighbors;
+    SteerLib::AgentInterface *tmp_agent;
+
+	gSpatialDatabase->getItemsInRange(_neighbors,
+            _position.x - (this->_radius + _SocialForcesParams.sf_query_radius),
+            _position.x + (this->_radius + _SocialForcesParams.sf_query_radius),
+			_position.z - (this->_radius + _SocialForcesParams.sf_query_radius),
+            _position.z + (this->_radius + _SocialForcesParams.sf_query_radius),
+            dynamic_cast<SteerLib::SpatialDatabaseItemPtr>(this));
+
+
+    for(std::set<SteerLib::SpatialDatabaseItemPtr>::iterator neighbor = _neighbors.begin(); neighbor != _neighbors.end(); neighbor++) {
+        if( (*neighbor)->isAgent() ) {
+            tmp_agent = dynamic_cast<SteerLib::AgentInterface *>(*neighbor);
+
+            if( id() != tmp_agent->id() &&
+                (tmp_agent->computePenetration(this->position(), this->radius()) > 0.000001) 
+              ) {
+                agent_repulsion_force = agent_repulsion_force + 
+                    (
+                    tmp_agent->computePenetration(this->position(), this->radius()) *
+                    _SocialForcesParams.sf_agent_body_force * dt
+                    ) *
+                    normalize(position() - tmp_agent->position());
+
+                return agent_repulsion_force;
+            }
+        } else {
+            continue;
+        }
+    }
 
     return Util::Vector(0,0,0);
 }
