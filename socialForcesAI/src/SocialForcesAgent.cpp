@@ -251,13 +251,11 @@ Util::Vector SocialForcesAgent::calcProximityForce(float dt)
             _position.z + (this->_radius + _SocialForcesParams.sf_query_radius),
             dynamic_cast<SteerLib::SpatialDatabaseItemPtr>(this));
 
-    std::cout << "we gucci 1" << std::endl;
 
 	for (std::set<SteerLib::SpatialDatabaseItemPtr>::iterator neighbor = _neighbors.begin();  neighbor != _neighbors.end();  neighbor++)
 	{
 		if ( (*neighbor)->isAgent() )
 		{
-            std::cout << "we gucci 2" << std::endl;
             tmp_agent = dynamic_cast<SteerLib::AgentInterface *>(*neighbor);
             Util::Vector away_tmp = normalize(position() - tmp_agent->position());
 
@@ -268,9 +266,7 @@ Util::Vector SocialForcesAgent::calcProximityForce(float dt)
 
             away = away + (away_tmp * (Ai * exp((Rij - Dij)/Bi)));
 
-            std::cout << "we gucci 3" << std::endl;
 		} else {
-            std::cout << "we gucci 4" << std::endl;
             tmp_ob = dynamic_cast<SteerLib::ObstacleInterface *>(*neighbor);
             Util::Vector wall_normal = calcWallNormal(tmp_ob);
             std::pair<Util::Point, Util::Point> line = calcWallPointsFromNormal(tmp_ob, wall_normal);
@@ -278,7 +274,6 @@ Util::Vector SocialForcesAgent::calcProximityForce(float dt)
             Util::Vector away_obs_tmp = normalize(position() - min_stuff.second);
 
 
-            std::cout << "we gucci 5" << std::endl;
             away_obs = away_obs + 
                         (
                             away_obs_tmp
@@ -303,7 +298,6 @@ Util::Vector SocialForcesAgent::calcProximityForce(float dt)
                             dt
                     );
 
-            std::cout << "we gucci 6" << std::endl;
         }
 	}
 
@@ -313,9 +307,7 @@ Util::Vector SocialForcesAgent::calcProximityForce(float dt)
 
 Vector SocialForcesAgent::calcGoalForce(Vector _goalDirection, float _dt)
 {
-    std:: cout << _goalDirection << std::endl;
-    std:: cout << velocity() << std::endl;
-    Vector goalForce = (_goalDirection - velocity()) / _dt;
+    Vector goalForce = ((_goalDirection * PREFERED_SPEED) - velocity()) / _dt;
     return goalForce;
 }
 
