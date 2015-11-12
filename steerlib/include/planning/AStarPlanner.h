@@ -85,7 +85,7 @@ namespace SteerLib
 
 			double AStarPlanner::heuristic(Util::Point a, Util::Point b);
 			
-			std::vector<Util::Point> AStarPlanner::reconstruct(AStarPlannerNode _Node);
+			std::vector<Util::Point> AStarPlanner::reconstruct(AStarPlannerNode _Node, Util::Point start);
 			
 			
 			/*

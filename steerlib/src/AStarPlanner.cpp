@@ -68,14 +68,14 @@ namespace SteerLib
 	}
 
 
-	std::vector<Util::Point> AStarPlanner::reconstruct(AStarPlannerNode _Node){
+	std::vector<Util::Point> AStarPlanner::reconstruct(AStarPlannerNode _Node, Util::Point start){
 		std::vector<Util::Point> reversePath;
 		std::vector<Util::Point> path;
-		AStarPlannerNode *p = _Node.parent;
-		while(p != NULL){
-			std::cout<<_Node.point.x<<','<<_Node.point.y<<','<<_Node.point.z<<'\n';
+		//AStarPlannerNode *p = _Node.parent;
+		while((*_Node.parent).point != getPointFromGridIndex(gSpatialDatabase->getCellIndexFromLocation(start))){
+			//std::cout<<_Node.point.x<<','<<_Node.point.y<<','<<_Node.point.z<<'\n';
 			reversePath.push_back(_Node.point);
-			p = _Node.parent;
+			//p = _Node.parent;
 			_Node = (*_Node.parent);
 		}
 		std::cout<<"out of while\n";
@@ -103,6 +103,7 @@ namespace SteerLib
 	bool AStarPlanner::computePath(std::vector<Util::Point>& agent_path,  Util::Point start, Util::Point goal, SteerLib::GridDatabase2D * _gSpatialDatabase, bool append_to_path)
 	{
 		std::cout<<start.x<<','<<start.z<<'\n';
+		std::cout<<goal.x<<','<<goal.z<<'\n';
 		gSpatialDatabase = _gSpatialDatabase;
 		std::vector<AStarPlannerNode> checked;
 		std::vector<AStarPlannerNode> frontier;
@@ -128,17 +129,20 @@ namespace SteerLib
 			std::vector<AStarPlannerNode>::iterator it = frontier.begin();
 			double temp = frontier.at(0).f;
 			for(std::vector<AStarPlannerNode>::iterator i = frontier.begin(); i != frontier.end(); ++i){
-				if((*i).f < temp){
+				if((*i).f <= temp){
 					temp = (*i).f;
 					it = i;
 				}
 			}
 			currentNode = (*it);
 			checked.push_back(currentNode);
+			if(checked.back() == startNode){
+			//std::cout<<checked.back().point.x<<','<<checked.back().point.z<<'\n';
+			}
 			frontier.erase(it);
 			currentNode=checked.back();
 			if(currentNode.point == getPointFromGridIndex(gSpatialDatabase->getCellIndexFromLocation(goal))){
-				agent_path = reconstruct(checked.back());
+				agent_path = reconstruct(checked.back(), start);
 				return true;
 			}
 			int currentID = gSpatialDatabase->getCellIndexFromLocation(currentNode.point);
