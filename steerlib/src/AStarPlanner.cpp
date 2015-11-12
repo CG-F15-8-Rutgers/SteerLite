@@ -68,14 +68,110 @@ namespace SteerLib
 	}
 
 
+	std::vector<Util::Point> AStarPlanner::reconstruct(AStarPlannerNode _Node){
+		std::vector<Util::Point> reversePath;
+		std::vector<Util::Point> path;
+		AStarPlannerNode *pointer = &_Node;
+		while((*pointer).parent != NULL){
+			reversePath.push_back((*pointer).point);
+			pointer = (*pointer).parent;
+		}
+		for(int i = reversePath.size() - 1; i >= 0; --i){
+			path.push_back(reversePath.at(i));
+		}
+		return path;
+	}
+	
+	double AStarPlanner::heuristic(Util::Point a, Util::Point b){
+		double f;
+		bool method = true; //if true, use Euclidean, if false use Manhattan
+		if(method){
+			f = sqrt((a.x - b.x)*(a.x - b.x) + (a.z - b.z)*(a.z - b.z));
+		}
+		else{
+			f = abs(a.x - b.x) + abs(a.z -b.z);
+		}
+		return f;
+	}
+	
+	
 
 	bool AStarPlanner::computePath(std::vector<Util::Point>& agent_path,  Util::Point start, Util::Point goal, SteerLib::GridDatabase2D * _gSpatialDatabase, bool append_to_path)
 	{
 		gSpatialDatabase = _gSpatialDatabase;
-
-		//TODO
-		std::cout<<"\nIn A*";
-
+		std::vector<AStarPlannerNode> checked;
+		std::vector<AStarPlannerNode> frontier;
+		int x_max_range = gSpatialDatabase->getNumCellsX();
+		int z_max_range = gSpatialDatabase->getNumCellsZ();
+		std::map<int, double> gscore;
+		std::map<int, double> fscore;
+		for(int i = 0; i < x_max_range; ++i){
+			for(int j = 0; j < z_max_range; ++j){
+				int WhatAmIDoingWithMyLife = gSpatialDatabase->getCellIndexFromGridCoords(i,j);
+				gscore[WhatAmIDoingWithMyLife] = INFINITY;
+				fscore[WhatAmIDoingWithMyLife] = INFINITY;
+			}
+		}
+		int startID = gSpatialDatabase->getCellIndexFromLocation(start);
+		gscore[startID] = 0;
+		fscore[startID] = gscore[startID] + heuristic(start,goal);
+		AStarPlannerNode startNode(start, gscore[startID], fscore[startID], NULL);
+		frontier.push_back(startNode);
+		AStarPlannerNode currentNode = startNode;
+		
+		while(frontier.empty() == false){
+			std::vector<AStarPlannerNode>::iterator it = frontier.begin();
+			double temp = frontier.at(0).f;
+			for(std::vector<AStarPlannerNode>::iterator i = frontier.begin() + 1; i != frontier.end(); ++i){
+				if((*i).f < temp){
+					temp = (*i).f;
+					it = i;
+				}
+			}
+			currentNode = (*it);
+			if(currentNode.point == goal){
+				agent_path = reconstruct(currentNode);
+				return true;
+			}
+			frontier.erase(it);
+			checked.push_back(currentNode);
+			int currentID = gSpatialDatabase->getCellIndexFromLocation(currentNode.point);
+			unsigned int currentX;
+			unsigned int currentZ;
+			gSpatialDatabase->getGridCoordinatesFromIndex(currentID,currentX,currentZ);
+			int tempID;
+			Util::Point tempPoint;
+			for(int i = currentX-1; i <= currentX+1; ++i) {
+				for(int j = currentZ-1; j <= currentZ+1; ++j) {
+					if (!(i == currentX && j == currentZ)) {
+						tempID = gSpatialDatabase->getCellIndexFromGridCoords(i, j);
+						tempPoint = getPointFromGridIndex(tempID);
+						bool contains = false;
+						for (int k = 0; k < checked.size(); ++k) {
+							if (checked.at(k).point == tempPoint) {
+								contains = true;
+							}
+						}
+						if(canBeTraversed(tempID) && !contains){
+							double tempGScore = gscore[currentID] + gSpatialDatabase->getTraversalCost(tempID);
+							if(tempGScore < gscore[tempID]){
+								gscore[tempID] = tempGScore;
+								fscore[tempID] = gscore[tempID] + heuristic(tempPoint,goal);
+								AStarPlannerNode neighborNode(tempPoint, gscore[tempID], fscore[tempID], &currentNode);
+								for (std::vector<AStarPlannerNode>::iterator k = frontier.begin(); k != frontier.end(); ++k) {
+									if ((*k).point == tempPoint) {
+										frontier.erase(k);
+									}
+								}
+								frontier.push_back(neighborNode);
+							}
+						}
+					}
+				}
+			}
+			
+			
+		}
 		return false;
 	}
 }

@@ -83,6 +83,11 @@ namespace SteerLib
 			*/
 			Util::Point getPointFromGridIndex(int id);
 
+			double AStarPlanner::heuristic(Util::Point a, Util::Point b);
+			
+			std::vector<Util::Point> AStarPlanner::reconstruct(AStarPlannerNode _Node);
+			
+			
 			/*
 				@function computePath
 				DO NOT CHANGE THE DEFINITION OF THIS FUNCTION
