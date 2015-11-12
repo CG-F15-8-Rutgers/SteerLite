@@ -71,14 +71,18 @@ namespace SteerLib
 	std::vector<Util::Point> AStarPlanner::reconstruct(AStarPlannerNode _Node){
 		std::vector<Util::Point> reversePath;
 		std::vector<Util::Point> path;
-		AStarPlannerNode *pointer = &_Node;
-		while((*pointer).parent != NULL){
-			reversePath.push_back((*pointer).point);
-			pointer = (*pointer).parent;
+		AStarPlannerNode *p = _Node.parent;
+		while(p != NULL){
+			std::cout<<_Node.point.x<<','<<_Node.point.y<<','<<_Node.point.z<<'\n';
+			reversePath.push_back(_Node.point);
+			p = _Node.parent;
+			_Node = (*_Node.parent);
 		}
+		std::cout<<"out of while\n";
 		for(int i = reversePath.size() - 1; i >= 0; --i){
 			path.push_back(reversePath.at(i));
 		}
+		std::cout<<"out\n";
 		return path;
 	}
 	
@@ -98,6 +102,7 @@ namespace SteerLib
 
 	bool AStarPlanner::computePath(std::vector<Util::Point>& agent_path,  Util::Point start, Util::Point goal, SteerLib::GridDatabase2D * _gSpatialDatabase, bool append_to_path)
 	{
+		std::cout<<start.x<<','<<start.z<<'\n';
 		gSpatialDatabase = _gSpatialDatabase;
 		std::vector<AStarPlannerNode> checked;
 		std::vector<AStarPlannerNode> frontier;
@@ -115,26 +120,27 @@ namespace SteerLib
 		int startID = gSpatialDatabase->getCellIndexFromLocation(start);
 		gscore[startID] = 0;
 		fscore[startID] = gscore[startID] + heuristic(start,goal);
-		AStarPlannerNode startNode(start, gscore[startID], fscore[startID], NULL);
+		AStarPlannerNode startNode(getPointFromGridIndex(gSpatialDatabase->getCellIndexFromLocation(start)), gscore[startID], fscore[startID], NULL);
 		frontier.push_back(startNode);
 		AStarPlannerNode currentNode = startNode;
 		
 		while(frontier.empty() == false){
 			std::vector<AStarPlannerNode>::iterator it = frontier.begin();
 			double temp = frontier.at(0).f;
-			for(std::vector<AStarPlannerNode>::iterator i = frontier.begin() + 1; i != frontier.end(); ++i){
+			for(std::vector<AStarPlannerNode>::iterator i = frontier.begin(); i != frontier.end(); ++i){
 				if((*i).f < temp){
 					temp = (*i).f;
 					it = i;
 				}
 			}
 			currentNode = (*it);
-			if(currentNode.point == goal){
-				agent_path = reconstruct(currentNode);
+			checked.push_back(currentNode);
+			frontier.erase(it);
+			currentNode=checked.back();
+			if(currentNode.point == getPointFromGridIndex(gSpatialDatabase->getCellIndexFromLocation(goal))){
+				agent_path = reconstruct(checked.back());
 				return true;
 			}
-			frontier.erase(it);
-			checked.push_back(currentNode);
 			int currentID = gSpatialDatabase->getCellIndexFromLocation(currentNode.point);
 			unsigned int currentX;
 			unsigned int currentZ;
@@ -157,7 +163,7 @@ namespace SteerLib
 							if(tempGScore < gscore[tempID]){
 								gscore[tempID] = tempGScore;
 								fscore[tempID] = gscore[tempID] + heuristic(tempPoint,goal);
-								AStarPlannerNode neighborNode(tempPoint, gscore[tempID], fscore[tempID], &currentNode);
+								AStarPlannerNode neighborNode(tempPoint, gscore[tempID], fscore[tempID], &checked.back());
 								for (std::vector<AStarPlannerNode>::iterator k = frontier.begin(); k != frontier.end(); ++k) {
 									if ((*k).point == tempPoint) {
 										frontier.erase(k);
