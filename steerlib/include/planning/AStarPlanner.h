@@ -97,14 +97,10 @@ namespace SteerLib
 			bool computePath(std::vector<Util::Point>& agent_path, Util::Point start, Util::Point goal, SteerLib::GridDatabase2D * _gSpatialDatabase, bool append_to_path = false);
 		private:
 			SteerLib::GridDatabase2D * gSpatialDatabase;
-			//Heuristic function from startIndex to endIndex
 			double heuristic(int startIndex, int endIndex);
-			//Expands at currentNode, adding eligible neighbors to openset and modifying f,g scores and parent node
-			void expand(int currentNode, int goalIndex, std::set<int>& openset, std::set<int> closedset, std::map<int,double>& gscore, std::map<int,double>& fscore, std::map<int,int>& camefrom);
-			//Adds found path to agent_path
-			bool retrace_path(std::vector<Util::Point>& agent_path, int currentNode, int startIndex, std::map<int,int>& camefrom);
-			//Finds node with lowest fscore in openset
-			int getCurrentNode(std::set<int> openset, std::map<int,double> fscore, std::map<int,double> gscore);
+			bool reconstruct_path(std::vector<Util::Point>& agent_path, int currentNode, std::map<int,AStarPlannerNode*> nodeMap);
+			int getCurrentNode(std::set<int> openset, std::map<int,AStarPlannerNode*> nodeMap);
+			void expand(int currentNode, int goalIndex, std::set<int>& openset, std::set<int> closedset, std::map<int,AStarPlannerNode*>& nodeMap);
 	};
 
 
