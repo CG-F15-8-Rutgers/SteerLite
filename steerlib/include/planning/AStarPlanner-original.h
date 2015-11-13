@@ -26,6 +26,7 @@ namespace SteerLib
 		parent : the pointer to the parent AStarPlannerNode, so that retracing the path is possible.
 		@operators 
 		The greater than, less than and equals operator have been overloaded. This means that objects of this class can be used with these operators. Change the functionality of the operators depending upon your implementation
+
 	*/
 	class STEERLIB_API AStarPlannerNode{
 		public:
@@ -82,6 +83,11 @@ namespace SteerLib
 			*/
 			Util::Point getPointFromGridIndex(int id);
 
+			double AStarPlanner::heuristic(Util::Point a, Util::Point b);
+			
+			std::vector<Util::Point> AStarPlanner::reconstruct(AStarPlannerNode _Node, Util::Point start);
+			
+			
 			/*
 				@function computePath
 				DO NOT CHANGE THE DEFINITION OF THIS FUNCTION
@@ -97,14 +103,6 @@ namespace SteerLib
 			bool computePath(std::vector<Util::Point>& agent_path, Util::Point start, Util::Point goal, SteerLib::GridDatabase2D * _gSpatialDatabase, bool append_to_path = false);
 		private:
 			SteerLib::GridDatabase2D * gSpatialDatabase;
-			//Heuristic function from startIndex to endIndex
-			double heuristic(int startIndex, int endIndex);
-			//Expands at currentNode, adding eligible neighbors to openset and modifying f,g scores and parent node
-			void expand(int currentNode, int goalIndex, std::set<int>& openset, std::set<int> closedset, std::map<int,double>& gscore, std::map<int,double>& fscore, std::map<int,int>& camefrom);
-			//Adds found path to agent_path
-			bool retrace_path(std::vector<Util::Point>& agent_path, int currentNode, int startIndex, std::map<int,int>& camefrom);
-			//Finds node with lowest fscore in openset
-			int getCurrentNode(std::set<int> openset, std::map<int,double> fscore);
 	};
 
 
