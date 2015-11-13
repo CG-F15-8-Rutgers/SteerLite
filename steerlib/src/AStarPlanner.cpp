@@ -21,8 +21,8 @@
 #define OBSTACLE_CLEARANCE 1
 #define MIN(X,Y) ((X) < (Y) ? (X) : (Y))
 #define MAX(X,Y) ((X) > (Y) ? (X) : (Y))
-#define CELL_DIST 1
 #define HEURISTIC_WEIGHT 1
+#define DIAGONAL_COST 1
 
 namespace SteerLib
 {
@@ -90,7 +90,13 @@ namespace SteerLib
 			for (int j = MAX(z-1,0); j<MIN(z+2,gSpatialDatabase->getNumCellsZ()); j += GRID_STEP) {
 				int neighbor = gSpatialDatabase->getCellIndexFromGridCoords(i,j);
 				if (canBeTraversed(neighbor) && closedset.count(neighbor)==0) {
-					double tempg = gscore[currentNode]+CELL_DIST;
+					double tempg;
+					if ((i==x) || (j==z)) {
+						tempg = gscore[currentNode]+(DIAGONAL_COST*gSpatialDatabase->getTraversalCost(neighbor));
+					}
+					else {
+						tempg = gscore[currentNode]+gSpatialDatabase->getTraversalCost(neighbor);
+					}
 					if (tempg < gscore[neighbor]) {
 						gscore[neighbor] = tempg;
 						fscore[neighbor] = gscore[neighbor]+HEURISTIC_WEIGHT*heuristic(neighbor,goalIndex);
@@ -115,13 +121,27 @@ namespace SteerLib
 		return true;
 	}
 	
-	int AStarPlanner::getCurrentNode(std::set<int> openset, std::map<int,double> fscore) {
+	int AStarPlanner::getCurrentNode(std::set<int> openset, std::map<int,double> fscore, std::map<int,double> gscore) {
 		std::set<int>::iterator it;
 		double temp = INFINITY;
+		//If bigger is true, larger g scores have precedence, else smaller scores have precedence
+		bool bigger = true;
 		for (std::set<int>::iterator i = openset.begin(); i != openset.end(); ++i) {
 			if (fscore[(*i)] < temp) {
 				temp = fscore[(*i)];
 				it = i;
+			}
+			else if (fscore[(*i)] == temp) {
+				if (bigger) {
+					if (gscore[(*it)] < gscore[(*i)]) {
+						it = i;
+					}
+				}
+				else {
+					if (gscore[(*it)] > gscore[(*i)]) {
+						it = i;
+					}
+				}
 			}
 		}
 		return (*it);
@@ -158,13 +178,11 @@ namespace SteerLib
 		
 		while (!openset.empty()) {
 			//take node with lowest f in open set, move from openset to closedset
-			int currentNode = getCurrentNode(openset, fscore);
-			std::cout<<openset.size()<<'\n';
+			int currentNode = getCurrentNode(openset, fscore, gscore);
 			closedset.insert(currentNode);
 			openset.erase(openset.find(currentNode));
 			
 			if (currentNode == goalIndex) {
-				std::cout<<"reached goalindex\n";
 				return retrace_path(agent_path, currentNode, startIndex, camefrom);
 			}
 			

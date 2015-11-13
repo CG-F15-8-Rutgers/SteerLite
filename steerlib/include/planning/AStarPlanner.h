@@ -104,7 +104,7 @@ namespace SteerLib
 			//Adds found path to agent_path
 			bool retrace_path(std::vector<Util::Point>& agent_path, int currentNode, int startIndex, std::map<int,int>& camefrom);
 			//Finds node with lowest fscore in openset
-			int getCurrentNode(std::set<int> openset, std::map<int,double> fscore);
+			int getCurrentNode(std::set<int> openset, std::map<int,double> fscore, std::map<int,double> gscore);
 	};
 
 
