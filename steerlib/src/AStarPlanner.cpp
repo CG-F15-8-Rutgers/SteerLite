@@ -120,7 +120,7 @@ namespace SteerLib
 		double temp = INFINITY;
 		for (std::set<int>::iterator i = openset.begin(); i != openset.end(); ++i) {
 			if (fscore[(*i)] < temp) {
-				temp = (*i);
+				temp = fscore[(*i)];
 				it = i;
 			}
 		}
