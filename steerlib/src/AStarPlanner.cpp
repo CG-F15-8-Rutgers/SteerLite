@@ -113,11 +113,16 @@ namespace SteerLib
 	
 	bool AStarPlanner::retrace_path(std::vector<Util::Point>& agent_path, int currentNode, int startIndex, std::map<int,int>& camefrom) {
 		int temp = currentNode;
-		agent_path.insert(agent_path.begin(), getPointFromGridIndex(temp));
+		std::vector<Util::Point> reverse;
+		reverse.push_back(getPointFromGridIndex(temp));
 		while (temp != startIndex) {
 			temp = camefrom[temp];
-			agent_path.insert(agent_path.begin(), getPointFromGridIndex(temp));
+			reverse.push_back(getPointFromGridIndex(temp));
 		}
+		for (int i = reverse.size()-1; i>=0; --i) {
+			agent_path.push_back(reverse.at(i));
+		}
+		std::cout<<"\nPath length: "<<reverse.size()<<'\n';
 		return true;
 	}
 	
