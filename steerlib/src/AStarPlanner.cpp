@@ -18,7 +18,7 @@
 
 #define COLLISION_COST  1000
 #define GRID_STEP  1
-#define OBSTACLE_CLEARANCE 1
+#define OBSTACLE_CLEARANCE 0
 #define MIN(X,Y) ((X) < (Y) ? (X) : (Y))
 #define MAX(X,Y) ((X) > (Y) ? (X) : (Y))
 #define HEURISTIC_WEIGHT 1
@@ -112,7 +112,7 @@ namespace SteerLib
 		}
 		
 		
-		std::cout<<"\nIn A*";
+		//std::cout<<"\nIn A*";
 		
 		return false;
 	}
@@ -133,16 +133,11 @@ namespace SteerLib
 	
 	bool AStarPlanner::reconstruct_path(std::vector<Util::Point>& agent_path, int currentNode, std::map<int,AStarPlannerNode*> nodeMap) {
 		AStarPlannerNode* temp = nodeMap[currentNode];
-		std::vector<Util::Point> reverse;
-		reverse.push_back((*temp).point);
-		while ((*temp).parent != nullptr) {
+		while ((*temp).parent) {
 			temp = (*temp).parent;
-			reverse.push_back((*temp).point);
+			agent_path.insert(agent_path.begin(),(*temp).point);
 		}
-		for (int i = reverse.size()-1; i>=0; --i) {
-			agent_path.push_back(reverse.at(i));
-		}
-		std::cout<<"\nPath length: "<<reverse.size()<<'\n';
+		//std::cout<<"\nPath length: "<<reverse.size()<<'\n';
 		return true;
 	}
 	
