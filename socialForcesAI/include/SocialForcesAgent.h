@@ -20,7 +20,7 @@
 // #include "SimpleAgent.h"
 // #include "SocialForcesAIModule.h"
 #include "SocialForces_Parameters.h"
-
+#include "planning/AStarPlanner.h"
 
 /**
  * @brief Social Forces Agent stuff
@@ -126,6 +126,7 @@ class SocialForcesAgent : public SteerLib::AgentInterface
         std::vector<Util::Point> _midTermPath;
         // holds the location of the best local target along the midtermpath
         Util::Point _currentLocalTarget;
+        SteerLib::AStarPlanner astar;
 
         friend class SocialForcesAIModule;
 

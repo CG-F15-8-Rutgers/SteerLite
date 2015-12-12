@@ -352,7 +352,7 @@ Util::Vector SocialForcesAgent::calcAgentRepulsionForce(float dt)
         }
     }
 
-    return agent_repulsion_force;
+    return agent_repulsion_force / 2;
 }
 
 
@@ -397,7 +397,7 @@ Util::Vector SocialForcesAgent::calcWallRepulsionForce(float dt)
         }
     }
 
-    return wall_repulsion_force;
+    return wall_repulsion_force / 2;
 }
 
 
@@ -769,11 +769,16 @@ bool SocialForcesAgent::runLongTermPlanning()
 	std::vector<Util::Point> agentPath;
 	Util::Point pos =  position();
 
+    astar.computePath(agentPath, pos, _goalQueue.front().targetLocation, gSpatialDatabase, true);
+    std::cout << "astar over" << std::endl;
+    /*
 	if ( !gSpatialDatabase->findPath(pos, _goalQueue.front().targetLocation,
 			agentPath, (unsigned int) 50000))
 	{
+        std::cout << "returning here" << std::endl;
 		return false;
 	}
+    */
 
 	for  (int i=1; i <  agentPath.size(); i++)
 	{
@@ -799,16 +804,22 @@ bool SocialForcesAgent::runLongTermPlanning2()
 	// run the main a-star search here
 	std::vector<Util::Point> agentPath;
 	Util::Point pos =  position();
+    
+    astar.computePath(agentPath, pos, _goalQueue.front().targetLocation, gSpatialDatabase, true);
+
 	if (gEngine->isAgentSelected(this))
 	{
 		// std::cout << "agent" << this->id() << " is running planning again" << std::endl;
 	}
 
+    /*
 	if ( !gSpatialDatabase->findSmoothPath(pos, _goalQueue.front().targetLocation,
 			agentPath, (unsigned int) 50000))
 	{
+        std::cout << "returning here" << std::endl;
 		return false;
 	}
+    */
 
 	// Push path into _waypoints
 

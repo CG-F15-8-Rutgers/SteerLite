@@ -26,6 +26,7 @@ namespace SteerLib
 		parent : the pointer to the parent AStarPlannerNode, so that retracing the path is possible.
 		@operators 
 		The greater than, less than and equals operator have been overloaded. This means that objects of this class can be used with these operators. Change the functionality of the operators depending upon your implementation
+
 	*/
 	class STEERLIB_API AStarPlannerNode{
 		public:
@@ -44,6 +45,20 @@ namespace SteerLib
 		    {
 		        return this->f < other.f;
 		    }
+			bool operator<=(AStarPlannerNode other) const
+			{
+				//smaller g values
+				/*if ((this->f - other.f) == 0) {
+					return this->g < other.g;
+				}*/
+				//larger g values
+				if ((this->f - other.f) == 0) {
+					return this->g > other.g;
+				}
+				else {
+					return this->f < other.f;
+				}
+			}
 		    bool operator>(AStarPlannerNode other) const
 		    {
 		        return this->f > other.f;
@@ -95,12 +110,10 @@ namespace SteerLib
 			*/
 
 			bool computePath(std::vector<Util::Point>& agent_path, Util::Point start, Util::Point goal, SteerLib::GridDatabase2D * _gSpatialDatabase, bool append_to_path = false);
-		private:
+			bool computeEuclideanPath(std::vector<Util::Point>& agent_path, Util::Point start, Util::Point goal, SteerLib::GridDatabase2D * _gSpatialDatabase, bool append_to_path);
+			bool computeManhattanPath(std::vector<Util::Point>& agent_path, Util::Point start, Util::Point goal, SteerLib::GridDatabase2D * _gSpatialDatabase, bool append_to_path);
+	private:
 			SteerLib::GridDatabase2D * gSpatialDatabase;
-			double heuristic(int startIndex, int endIndex);
-			bool reconstruct_path(std::vector<Util::Point>& agent_path, int currentNode, std::map<int,AStarPlannerNode*> nodeMap);
-			int getCurrentNode(std::set<int> openset, std::map<int,AStarPlannerNode*> nodeMap);
-			void expand(int currentNode, int goalIndex, std::set<int>& openset, std::set<int> closedset, std::map<int,AStarPlannerNode*>& nodeMap);
 	};
 
 
